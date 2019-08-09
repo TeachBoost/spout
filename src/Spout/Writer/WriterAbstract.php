@@ -144,6 +144,40 @@ abstract class WriterAbstract implements WriterInterface
     }
 
     /**
+     * @codeCoverageIgnore
+     * {@inheritdoc}
+     */
+    public function openToBuffer(string $outputFileName)
+    {
+        $this->outputFilePath = $this->globalFunctionsHelper->basename($outputFileName);
+
+        $this->filePointer = $this->globalFunctionsHelper->fopen('php://output', 'w');
+        $this->throwIfFilePointerIsNotAvailable();
+
+        $this->openWriter();
+        $this->isWriterOpened = true;
+
+        return $this;
+    }
+
+    /**
+     * Returns the array of headers to be sent to the browser.
+     *
+     * @return array
+     */
+    public function getBrowserHeaders(string $outputFileName)
+    {
+        $path = $this->globalFunctionsHelper->basename($outputFileName);
+
+        return [
+            'Content-Type' => static::$headerContentType,
+            'Content-Disposition' => 'attachment; filename="'.$path.'"',
+            'Cache-Control' => 'max-age=0',
+            'Pragma' => 'public'
+        ];
+    }
+
+    /**
      * Checks if the pointer to the file/stream to write to is available.
      * Will throw an exception if not available.
      *
